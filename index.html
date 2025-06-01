@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secret Message for Aru</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #fff5f5;
+      color: #333;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .login-container {
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(255, 105, 180, 0.2);
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      z-index: 10;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 182, 193, 0.3);
+      animation: float 4s ease-in-out infinite;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translate(-50%, -50%); }
+      50% { transform: translate(-50%, -60%); }
+    }
+    
+    .logo {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 20px;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 30c10 0 20-10 20-20 0 10 10 20 20 20-10 0-20 10-20 20 0-10-10-20-20-20z" fill="%23ff9bb3"/><circle cx="35" cy="25" r="5" fill="%23333"/><circle cx="65" cy="25" r="5" fill="%23333"/><path d="M40 35c5 5 15 5 20 0" stroke="%23333" stroke-width="2" fill="none"/><path d="M30 60c0 20 20 20 20 20s20 0 20-20c0-10-10-10-20-10s-20 0-20 10z" fill="%23ff9bb3"/><path d="M30 50c0-10 10-10 20-10s20 0 20 10" stroke="%23333" stroke-width="2" fill="none"/></svg>');
+      background-size: contain;
+      background-repeat: no-repeat;
+      filter: drop-shadow(0 5px 10px rgba(255, 105, 180, 0.3));
+    }
+    
+    h1 {
+      color: #ff6b8b;
+      margin-bottom: 20px;
+      font-weight: 600;
+      font-size: 1.8rem;
+      text-shadow: 0 2px 5px rgba(255, 182, 193, 0.5);
+    }
+    
+    .subtitle {
+      color: #888;
+      margin-bottom: 30px;
+      font-size: 0.9rem;
+    }
+    
+    .password-input {
+      position: relative;
+      margin-bottom: 25px;
+    }
+    
+    input {
+      width: 100%;
+      padding: 12px 20px;
+      border: 2px solid #ffc0cb;
+      border-radius: 30px;
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.3s;
+      background-color: rgba(255, 255, 255, 0.8);
+    }
+    
+    input:focus {
+      border-color: #ff6b8b;
+      box-shadow: 0 0 10px rgba(255, 107, 181, 0.3);
+    }
+    
+    button {
+      background: linear-gradient(45deg, #ff6b8b, #ff8e9e);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 30px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 5px 15px rgba(255, 107, 181, 0.4);
+      width: 100%;
+      font-weight: 600;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 7px 20px rgba(255, 107, 181, 0.6);
+    }
+    
+    button:active {
+      transform: translateY(1px);
+    }
+    
+    .error-message {
+      color: #ff4757;
+      margin-top: 15px;
+      font-size: 0.9rem;
+      height: 20px;
+    }
+    
+    .falling-letter {
+      position: absolute;
+      color: rgba(255, 155, 179, 0.6);
+      font-size: 24px;
+      font-weight: bold;
+      user-select: none;
+      pointer-events: none;
+      z-index: 1;
+      animation: fall linear infinite;
+    }
+    
+    @keyframes fall {
+      to {
+        transform: translateY(100vh);
+      }
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .heart {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: rgba(255, 107, 181, 0.6);
+      transform: rotate(45deg);
+      animation: float-heart 4s ease-in-out infinite;
+    }
+    
+    .heart:before, .heart:after {
+      content: '';
+      width: 20px;
+      height: 20px;
+      background-color: rgba(255, 107, 181, 0.6);
+      border-radius: 50%;
+      position: absolute;
+    }
+    
+    .heart:before {
+      top: -10px;
+      left: 0;
+    }
+    
+    .heart:after {
+      top: 0;
+      left: -10px;
+    }
+    
+    @keyframes float-heart {
+      0%, 100% { transform: rotate(45deg) translateY(0); opacity: 0.8; }
+      50% { transform: rotate(45deg) translateY(-20px); opacity: 1; }
+    }
+    
+    /* Main content styles */
+    #main-content {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      background-color: rgba(255, 245, 245, 0.7);
+      backdrop-filter: blur(5px);
+    }
+    
+    #bg-image {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.2;
+      z-index: -1;
+    }
+    
+    #heading {
+      position: absolute;
+      top: -8px;
+      width: 100%;
+      text-align: center;
+      color: #ff9bb3;
+      font-size: 8rem;
+      font-weight: bold;
+      text-shadow: 0 0 10px #ffc0cb, 0 0 20px #ffffff;
+      z-index: 100;
+      pointer-events: none;
+      animation: sparkle 1.5s infinite alternate;
+    }
+    
+    #name {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 4rem;
+      font-weight: bold;
+      text-shadow: 0 0 10px #ff1464;
+      opacity: 0;
+      transition: opacity 2s;
+      z-index: 100;
+      pointer-events: none;
+    }
+    
+    /* Circular side buttons */
+    .circle-button {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, #ff6b8b, #ff8e9e);
+      color: white;
+      border: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 5px 15px rgba(255, 107, 181, 0.4);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.9;
+    }
+    
+    .circle-button:hover {
+      transform: translateY(-50%) scale(1.1);
+      box-shadow: 0 7px 20px rgba(255, 107, 181, 0.6);
+      opacity: 1;
+    }
+    
+    .circle-button:active {
+      transform: translateY(-50%) scale(0.95);
+    }
+    
+    #left-button {
+      left: 20px;
+    }
+    
+    #right-button {
+      right: 20px;
+    }
+    
+    /* Romantic message popup */
+    .romantic-message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(255, 105, 180, 0.3);
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      z-index: 300;
+      display: none;
+      animation: fadeIn 0.5s ease-out;
+      border: 1px solid rgba(255, 182, 193, 0.5);
+    }
+    
+    .romantic-message h2 {
+      color: #ff6b8b;
+      margin-bottom: 15px;
+      font-size: 1.8rem;
+    }
+    
+    .romantic-message p {
+      color: #555;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      font-size: 1.1rem;
+    }
+    
+    .close-message {
+      background: linear-gradient(45deg, #ff6b8b, #ff8e9e);
+      color: white;
+      border: none;
+      padding: 10px 25px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+    
+    .close-message:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 10px rgba(255, 107, 181, 0.4);
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translate(-50%, -40%); }
+      to { opacity: 1; transform: translate(-50%, -50%); }
+    }
+    
+    @keyframes sparkle {
+      0% { text-shadow: 0 0 10px #ffc0cb, 0 0 20px #ffffff; }
+      100% { text-shadow: 0 0 20px #ff9bb3, 0 0 30px #ffc0cb, 0 0 40px #ffffff; }
+    }
+    
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <div id="login-page">
+    <div class="login-container">
+      <div class="logo"></div>
+      <h1>My Secret Message</h1>
+      <p class="subtitle">Enter the special password to continue</p>
+      
+      <div class="password-input">
+        <input type="password" id="password-input" placeholder="Enter password...">
+      </div>
+      
+      <button id="submit-btn">Unlock My Heart</button>
+      <div class="error-message" id="error-message"></div>
+    </div>
+    
+    <!-- Create falling letters -->
+    <div id="falling-letters"></div>
+    
+    <!-- Create floating hearts -->
+    <div id="floating-hearts"></div>
+  </div>
+  
+  <div id="main-content">
+    <!-- Background image -->
+    <img id="bg-image" src="bg.png" alt="Background">
+    
+    <!-- Main heading -->
+    <div id="heading">I Love You ♥</div>
+    
+    <!-- Name that appears after animation -->
+    <div id="name">Aru</div>
+    
+    <!-- Canvas for heart animation -->
+    <canvas id="scene"></canvas>
+    
+    <!-- Hidden audio element for music -->
+    <audio id="romantic-music" loop>
+      <source src="D:\Aru\song.mp3" type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
+    
+    <!-- Romantic message popup -->
+    <div class="romantic-message" id="romantic-message">
+      <h2>My Dearest Aru,Sorry!</h2>
+      <p>I broke promises, made you cry, and hurt the heart I cherish most.
+I can't take back the pain, but I promise to heal it—with love, patience, and change.</p>
+You are my everything, and I never want to be the reason you feel broken again.
+Please forgive me, my jaan. </p>
+<p>I love you more than words can say. 💔❤️</p>
+      <button class="close-message" id="close-message">Close</button>
+    </div>
+    
+    <!-- Circular side buttons -->
+    <button class="circle-button" id="left-button">💌</button>
+    <button class="circle-button" id="right-button">🎵</button>
+  </div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+
+  <script>
+    // Create falling letters
+    const letters = ['K', 'I', 'T', 'K', 'A', 'T', '❤', '🐱'];
+    const fallingLettersContainer = document.getElementById('falling-letters');
+    
+    function createFallingLetter() {
+      const letter = document.createElement('div');
+      letter.className = 'falling-letter';
+      letter.textContent = letters[Math.floor(Math.random() * letters.length)];
+      
+      // Random position and animation duration
+      const leftPos = Math.random() * 100;
+      const animationDuration = 5 + Math.random() * 10;
+      const fontSize = 20 + Math.random() * 20;
+      const opacity = 0.2 + Math.random() * 0.5;
+      
+      letter.style.left = `${leftPos}vw`;
+      letter.style.animationDuration = `${animationDuration}s`;
+      letter.style.fontSize = `${fontSize}px`;
+      letter.style.opacity = opacity;
+      letter.style.animationDelay = `${Math.random() * 5}s`;
+      
+      fallingLettersContainer.appendChild(letter);
+      
+      // Remove letter after animation completes
+      setTimeout(() => {
+        letter.remove();
+      }, animationDuration * 1000);
+    }
+    
+    // Create floating hearts
+    const floatingHeartsContainer = document.getElementById('floating-hearts');
+    
+    function createFloatingHeart() {
+      const heart = document.createElement('div');
+      heart.className = 'heart';
+      
+      // Random position and size
+      const leftPos = Math.random() * 100;
+      const topPos = Math.random() * 100;
+      const size = 10 + Math.random() * 20;
+      
+      heart.style.left = `${leftPos}vw`;
+      heart.style.top = `${topPos}vh`;
+      heart.style.width = `${size}px`;
+      heart.style.height = `${size}px`;
+      heart.style.animationDelay = `${Math.random() * 4}s`;
+      
+      floatingHeartsContainer.appendChild(heart);
+      
+      // Remove heart after animation completes
+      setTimeout(() => {
+        heart.remove();
+      }, 8000);
+    }
+    
+    // Generate falling letters and hearts periodically
+    setInterval(createFallingLetter, 300);
+    setInterval(createFloatingHeart, 1000);
+    
+    // Password check
+    const correctPassword = "131024";
+    const passwordInput = document.getElementById('password-input');
+    const submitBtn = document.getElementById('submit-btn');
+    const errorMessage = document.getElementById('error-message');
+    const loginPage = document.getElementById('login-page');
+    const mainContent = document.getElementById('main-content');
+    
+    submitBtn.addEventListener('click', () => {
+      if (passwordInput.value === correctPassword) {
+        // Correct password - hide login and show main content
+        loginPage.style.display = 'none';
+        mainContent.style.display = 'block';
+        initializeMainContent();
+      } else {
+        // Wrong password
+        errorMessage.textContent = "Love Me More Kitkat!";
+        passwordInput.style.borderColor = "#ff4757";
+      }
+    });
+    
+    passwordInput.addEventListener('input', () => {
+      errorMessage.textContent = "";
+      passwordInput.style.borderColor = "#ffc0cb";
+    });
+    
+    passwordInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        submitBtn.click();
+      }
+    });
+    
+    function initializeMainContent() {
+      // Get elements for buttons and music
+      const leftButton = document.getElementById('left-button');
+      const rightButton = document.getElementById('right-button');
+      const musicPlayer = document.getElementById('romantic-music');
+      const romanticMessage = document.getElementById('romantic-message');
+      const closeMessage = document.getElementById('close-message');
+      let isPlaying = false;
+      
+      // Right button - Music control
+      rightButton.addEventListener('click', () => {
+        if (isPlaying) {
+          musicPlayer.pause();
+          rightButton.textContent = "🎵";
+        } else {
+          musicPlayer.play();
+          rightButton.textContent = "🔊";
+        }
+        isPlaying = !isPlaying;
+      });
+      
+      // Left button - Show romantic message
+      leftButton.addEventListener('click', () => {
+        romanticMessage.style.display = 'block';
+      });
+      
+      // Close message button
+      closeMessage.addEventListener('click', () => {
+        romanticMessage.style.display = 'none';
+      });
+      
+      // Create the main script for heart animation
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.textContent = `
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
+        import gsap from 'https://cdn.skypack.dev/gsap@3.12.2';
+
+        // Scene setup
+        const canvas = document.getElementById('scene');
+        const renderer = new THREE.WebGLRenderer({ 
+          canvas, 
+          antialias: true,
+          alpha: true,
+          premultipliedAlpha: false
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const scene = new THREE.Scene();
+        scene.background = null; // Make scene transparent
+        const camera = new THREE.PerspectiveCamera(
+          45, 
+          window.innerWidth / window.innerHeight, 
+          0.1, 
+          1000
+        );
+        camera.position.set(0, 0, 120);
+
+        // Controls
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.8;
+
+        // Lighting (reduced intensity to see background better)
+        scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.7);
+        dirLight.position.set(1, 1, 2);
+        scene.add(dirLight);
+
+        // Add sparkling particles
+        const sparkles = new THREE.BufferGeometry();
+        const sparkleCount = 200;
+        const sparklePositions = new Float32Array(sparkleCount * 3);
+        
+        for (let i = 0; i < sparkleCount; i++) {
+          sparklePositions[i * 3] = Math.random() * 2 - 1;
+          sparklePositions[i * 3 + 1] = Math.random() * 2 - 1;
+          sparklePositions[i * 3 + 2] = Math.random() * 2 - 1;
+        }
+        
+        sparkles.setAttribute('position', new THREE.BufferAttribute(sparklePositions, 3));
+        const sparkleMaterial = new THREE.PointsMaterial({
+          color: 0xffffff,
+          size: 2,
+          transparent: true,
+          opacity: 0.8,
+          blending: THREE.AdditiveBlending
+        });
+        const sparkleParticles = new THREE.Points(sparkles, sparkleMaterial);
+        sparkleParticles.scale.set(100, 100, 100);
+        scene.add(sparkleParticles);
+
+        // Upside-down heart geometry
+        function createHeartGeometry(scale = 1) {
+          const shape = new THREE.Shape();
+          shape.moveTo(0, 0);
+          // Upside-down heart curve points
+          shape.bezierCurveTo(0, 0, 5, 5, 10, 0);
+          shape.bezierCurveTo(15, -5, 15, -17, 0, -25);
+          shape.bezierCurveTo(-15, -17, -15, -5, -10, 0);
+          shape.bezierCurveTo(-5, 5, 0, 0, 0, 0);
+          
+          const extrudeSettings = { 
+            depth: 2, 
+            bevelEnabled: false 
+          };
+          const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+          geometry.scale(scale, scale, scale);
+          geometry.center();
+          return geometry;
+        }
+
+        // Create small hearts with slightly transparent material
+        const SMALL_HEART_GEO = createHeartGeometry(0.18);
+        const SMALL_HEART_MAT = new THREE.MeshPhongMaterial({ 
+          color: 0xff1464, 
+          shininess: 40, 
+          flatShading: true,
+          transparent: true,
+          opacity: 0.9
+        });
+
+        const HEART_COUNT = 600;
+        const hearts = new THREE.InstancedMesh(
+          SMALL_HEART_GEO, 
+          SMALL_HEART_MAT, 
+          HEART_COUNT
+        );
+        hearts.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+        scene.add(hearts);
+
+        // Position all small hearts randomly
+        const dummy = new THREE.Object3D();
+        const startPositions = [];
+        
+        for (let i = 0; i < HEART_COUNT; i++) {
+          dummy.position.set(
+            THREE.MathUtils.randFloatSpread(160),
+            THREE.MathUtils.randFloatSpread(160),
+            THREE.MathUtils.randFloatSpread(160)
+          );
+          dummy.rotation.set(
+            Math.random() * Math.PI, 
+            Math.random() * Math.PI, 
+            Math.random() * Math.PI
+          );
+          dummy.updateMatrix();
+          hearts.setMatrixAt(i, dummy.matrix);
+          startPositions.push(dummy.position.clone());
+        }
+
+        // Create target heart positions (already upside-down)
+        const BIG_HEART_GEO = createHeartGeometry(4);
+        const merged = mergeVertices(BIG_HEART_GEO);
+        const bigPos = merged.attributes.position;
+        const bigPositions = [];
+        
+        for (let i = 0; i < bigPos.count; i++) {
+          bigPositions.push(new THREE.Vector3(
+            bigPos.getX(i) * 0.4,
+            bigPos.getY(i) * 0.4,
+            bigPos.getZ(i) * 0.4
+          ));
+        }
+
+        // Animation functions
+        function animateToHeart() {
+          for (let i = 0; i < HEART_COUNT; i++) {
+            const target = bigPositions[i % bigPositions.length];
+            gsap.to(startPositions[i], {
+              duration: 4,
+              x: target.x,
+              y: target.y,
+              z: target.z,
+              ease: "expo.inOut",
+              delay: i * 0.002,
+              onComplete: () => {
+                if (i === HEART_COUNT - 1) {
+                  // Show name when animation completes
+                  document.getElementById('name').style.opacity = '1';
+                }
+              }
+            });
+          }
+        }
+
+        function pulsing() {
+          gsap.to(hearts.scale, {
+            duration: 1.2,
+            x: 1.05,
+            y: 1.05,
+            z: 1.05,
+            yoyo: true,
+            repeat: -1,
+            ease: "sine.inOut",
+            delay: 4.2
+          });
+        }
+
+        // Render loop
+        const clock = new THREE.Clock();
+        function render() {
+          const delta = clock.getDelta();
+          
+          // Animate sparkles
+          sparkleParticles.rotation.x += 0.001;
+          sparkleParticles.rotation.y += 0.001;
+          
+          for (let i = 0; i < HEART_COUNT; i++) {
+            dummy.position.copy(startPositions[i]);
+            dummy.rotation.x += 0.005 * delta * 60;
+            dummy.rotation.y += 0.005 * delta * 60;
+            dummy.updateMatrix();
+            hearts.setMatrixAt(i, dummy.matrix);
+          }
+          
+          hearts.instanceMatrix.needsUpdate = true;
+          controls.update();
+          renderer.render(scene, camera);
+          requestAnimationFrame(render);
+        }
+
+        // Start animations immediately since we're loading dynamically
+        animateToHeart();
+        pulsing();
+        render();
+
+        // Handle resize
+        window.addEventListener('resize', () => {
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+      `;
+      document.body.appendChild(script);
+    }
+  </script>
+</body>
+</html>
